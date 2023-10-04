@@ -53,22 +53,29 @@ impl FromStr for Card {
         if s.len() != 2 && s.len() != 3 {
             return Err(format!("Invalid card string: {}", s));
         }
-        let suit =
-            s.chars().next().unwrap().to_string().parse::<Suit>()?;
-        let value = s
-            .chars()
-            .nth(1)
-            .unwrap()
-            .to_digit(10)
-            .ok_or(format!("Invalid value: {}", s))?;
-        Ok(Card {
-            suit,
-            value: value as u8,
-        })
+        let suit_char = s.chars().next().unwrap();
+        let suit = suit_char.to_string().parse::<Suit>()?;
+        let value_str = &s[1..];
+
+        let value = match value_str {
+            "J" => Ok(11),
+            "Q" => Ok(12),
+            "K" => Ok(13),
+            _ => value_str
+                .parse::<u8>()
+                .map_err(|_| format!("Invalid value: {}", value_str)),
+        }?;
+        if value > 13 || value < 1 {
+            return Err(format!(
+                "Value too small or too large: value = {}",
+                value
+            ));
+        }
+        Ok(Card { suit, value })
     }
 }
 
-fn parse_cards(cards_str: &str) -> Result<Vec<Card>, String> {
+pub fn parse_cards(cards_str: &str) -> Result<Vec<Card>, String> {
     cards_str
         .split_whitespace()
         .map(str::parse::<Card>)
@@ -124,9 +131,18 @@ mod tests {
     }
 
     #[test]
+    fn test_faulty_parse_cards() {
+        let wrong_cards: &str = "D1 H2 C14";
+        assert_eq!(
+            parse_cards(wrong_cards),
+            Err("Value too small or too large: value = 14".to_string())
+        );
+    }
+
+    #[test]
     fn test_parse_cards() {
-        let cards_str = "D1 H2 S3 C4";
-        let cards = parse_cards(cards_str).unwrap();
+        let cards_str: &str = "D1 H2 S3 C4 H10 C12";
+        let cards: Vec<Card> = parse_cards(cards_str).unwrap();
         assert_eq!(
             cards,
             vec![
@@ -146,6 +162,14 @@ mod tests {
                     suit: Suit::Club,
                     value: 4
                 },
+                Card {
+                    suit: Suit::Heart,
+                    value: 10,
+                },
+                Card {
+                    suit: Suit::Club,
+                    value: 12,
+                }
             ]
         );
     }

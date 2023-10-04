@@ -1,4 +1,4 @@
-use crate::cards::{gen_full_deck, Card, Suit};
+use crate::cards::{gen_full_deck, parse_cards, Card, Suit};
 use rand::{rngs::ThreadRng, seq::SliceRandom};
 
 struct GameState {
@@ -44,7 +44,7 @@ impl KnownGameState {
         let mut player_order: Vec<usize> = (0..num_players).collect();
         player_order.rotate_left(self.turn as usize);
 
-        for i in 0..self.trick.len() {
+        for _i in 0..self.trick.len() {
             player_order.pop(); // Remove players who already played
         }
 
@@ -55,7 +55,7 @@ impl KnownGameState {
             player_idx = (player_idx + 1) & player_order.len();
         }
 
-        let mut game_state = GameState {
+        let game_state = GameState {
             turn: self.turn,
             hands: hands,
             played: self.played.clone(),
@@ -83,15 +83,15 @@ enum Move {
     Nothing,
 }
 
-fn backpropagate(node: &mut InformationSet, result: f32) {
+fn backpropagate(_node: &mut InformationSet, _result: f32) {
     // Update node.visit_count and node.value_sum
     // Recurse on node.parent (if it exists)
 }
 
 fn ucb1(
-    parent_visit_count: u32,
-    node_visit_count: u32,
-    node_value_sum: f32,
+    _parent_visit_count: u32,
+    _node_visit_count: u32,
+    _node_value_sum: f32,
 ) -> f32 {
     return 1.0;
 }
@@ -100,9 +100,9 @@ fn ucb1(
 // Select child nodes using UCB1 until a leaf node is reached
 // }
 
-fn expand(node: &mut InformationSet) {
-    // Generate all possible moves, create child nodes, and add them to node.children
-}
+// fn expand(_node: &mut InformationSet) {
+// Generate all possible moves, create child nodes, and add them to node.children
+// }
 
 #[cfg(test)]
 mod tests {
@@ -110,9 +110,10 @@ mod tests {
     use rand::thread_rng;
     #[test]
     fn test_determinize() {
-        let mut rng: ThreadRng = thread_rng();
+        // let _rng: ThreadRng = thread_rng();
         // let known_game_state = KnownGameState {
         //     turn: 0,
+        //     hand: parse_cards("H13, H12, H11")
         // }
     }
 }
